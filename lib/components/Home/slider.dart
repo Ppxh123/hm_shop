@@ -11,24 +11,34 @@ class HmSlider extends StatefulWidget {
 }
 
 class _SliderState extends State<HmSlider> {
-  @override
+  final CarouselSliderController _carouselController = CarouselSliderController();  // 轮播图控制器
+  int _currentIndex = 0;  // 当前索引
+   @override
   // 获取轮播图组件
   Widget _getSlider(){
     // 获取屏幕宽度
     final double screenWidth = MediaQuery.of(context).size.width; // 屏幕宽度
 
-    return CarouselSlider(items: List.generate(widget.bannerList.length,(int index){
-      return Image.network(
-        widget.bannerList[index].imgurl,
-        fit: BoxFit.cover,        // 图片等比例缩放，填充容器
-        width: screenWidth,      // 图片宽度为屏幕宽度
-      );
-    }), 
-    options: CarouselOptions(
-      viewportFraction: 1.0,  // 视口分数为1，即显示整张图片
-      autoPlay: true,        // 自动播放
-      autoPlayInterval: Duration(seconds: 4), // 自动播放间隔为4秒
-    ));
+    return CarouselSlider(
+      carouselController: _carouselController, 
+      items: List.generate(widget.bannerList.length,(int index){
+        return Image.network(
+          widget.bannerList[index].imgurl,
+          fit: BoxFit.cover,        // 图片等比例缩放，填充容器
+          width: screenWidth,      // 图片宽度为屏幕宽度
+        );
+      }), 
+      options: CarouselOptions(
+        viewportFraction: 1.0,  // 视口分数为1，即显示整张图片
+        autoPlay: true,        // 自动播放
+        autoPlayInterval: Duration(seconds: 4), // 自动播放间隔为4秒
+        onPageChanged: (int index, reason){
+          setState(() {
+            _currentIndex = index;
+          });
+        }
+      )
+    );
   }
 
   // 获取搜索框组件
@@ -59,9 +69,37 @@ class _SliderState extends State<HmSlider> {
     );
   }
 
+  // 获取指示器组件
+  Widget _getDots(){
+    return Positioned(
+      bottom: 10,
+      left: 0,
+      right: 0,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(widget.bannerList.length,(int index){
+          return GestureDetector(
+            onTap: (){
+              _carouselController.animateToPage(index, curve: Curves.easeInOut, duration: Duration(milliseconds: 300));
+            },
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              width: _currentIndex == index ? 70 : 40,
+              height: 7,
+              margin: EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                color: _currentIndex == index ? Colors.white : Colors.grey,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
   Widget build(BuildContext context) {
     return Stack(
-      children:[_getSlider(),_getSearch()]
+      children:[_getSlider(),_getSearch(),_getDots()]
     );
   }
 }
