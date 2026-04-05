@@ -1,7 +1,10 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:hm_shop/viewmodels/home.dart';
 
 class HmSlider extends StatefulWidget {
-  HmSlider({Key? key}) : super(key: key);
+  final List<BannerItem> bannerList;
+  HmSlider({Key? key, required this.bannerList}) : super(key: key);
 
   @override
   _SliderState createState() => _SliderState();
@@ -9,15 +12,56 @@ class HmSlider extends StatefulWidget {
 
 class _SliderState extends State<HmSlider> {
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      child: Container(
-        height: 200,
-        alignment: Alignment.center,
-        color: Colors.blue,
-        child: Text("轮播图", style: TextStyle(color: Colors.white, fontSize: 20)),
+  // 获取轮播图组件
+  Widget _getSlider(){
+    // 获取屏幕宽度
+    final double screenWidth = MediaQuery.of(context).size.width; // 屏幕宽度
+
+    return CarouselSlider(items: List.generate(widget.bannerList.length,(int index){
+      return Image.network(
+        widget.bannerList[index].imgurl,
+        fit: BoxFit.cover,        // 图片等比例缩放，填充容器
+        width: screenWidth,      // 图片宽度为屏幕宽度
+      );
+    }), 
+    options: CarouselOptions(
+      viewportFraction: 1.0,  // 视口分数为1，即显示整张图片
+      autoPlay: true,        // 自动播放
+      autoPlayInterval: Duration(seconds: 4), // 自动播放间隔为4秒
+    ));
+  }
+
+  // 获取搜索框组件
+  Widget _getSearch(){
+    return Positioned(
+      top: 10,
+      left: 0,
+      right: 0,
+      child: Padding(
+        padding: EdgeInsets.all(10),
+        child: Container(
+          height: 50,
+          padding: EdgeInsets.symmetric(horizontal: 30),
+          alignment: Alignment.centerLeft,
+          decoration: BoxDecoration(
+            color: Color.fromRGBO(0, 0, 0, 0.4),
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Text(
+            "搜索...",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return Stack(
+      children:[_getSlider(),_getSearch()]
     );
   }
 }
